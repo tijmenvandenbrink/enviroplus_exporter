@@ -25,7 +25,7 @@ logging.basicConfig(
     level=logging.INFO,
     datefmt='%Y-%m-%d %H:%M:%S')
 
-logging.info("""enviroplus-exporter.py - Print readings from the Enviro+ sensor by Pimoroni.
+logging.info("""enviroplus_exporter.py - Print readings from the Enviro+ sensor by Pimoroni.
 
 Press Ctrl+C to exit!
 
