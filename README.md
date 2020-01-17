@@ -24,8 +24,6 @@
 [![Stargazers][stars-shield]][stars-url]
 [![Issues][issues-shield]][issues-url]
 [![MIT License][license-shield]][license-url]
-[![LinkedIn][linkedin-shield]][linkedin-url]
-
 
 
 <!-- PROJECT LOGO -->
@@ -207,7 +205,7 @@ I added two labels to the targets ```group: environment``` and ```location: Some
 
 ### Grafana
 
-I will publish a Grafana Dashboard shortly
+I will publish a Grafana Dashboard shortly.
 
 
 <!-- ROADMAP -->
@@ -241,16 +239,16 @@ Distributed under the MIT License. See `LICENSE` for more information.
 
 <!-- MARKDOWN LINKS & IMAGES -->
 <!-- https://www.markdownguide.org/basic-syntax/#reference-style-links -->
-[contributors-shield]: https://img.shields.io/github/contributors/othneildrew/Best-README-Template.svg?style=flat-square
-[contributors-url]: https://github.com/othneildrew/Best-README-Template/graphs/contributors
-[forks-shield]: https://img.shields.io/github/forks/othneildrew/Best-README-Template.svg?style=flat-square
-[forks-url]: https://github.com/othneildrew/Best-README-Template/network/members
-[stars-shield]: https://img.shields.io/github/stars/othneildrew/Best-README-Template.svg?style=flat-square
-[stars-url]: https://github.com/othneildrew/Best-README-Template/stargazers
-[issues-shield]: https://img.shields.io/github/issues/othneildrew/Best-README-Template.svg?style=flat-square
-[issues-url]: https://github.com/othneildrew/Best-README-Template/issues
-[license-shield]: https://img.shields.io/github/license/othneildrew/Best-README-Template.svg?style=flat-square
-[license-url]: https://github.com/othneildrew/Best-README-Template/blob/master/LICENSE.txt
-[linkedin-shield]: https://img.shields.io/badge/-LinkedIn-black.svg?style=flat-square&logo=linkedin&colorB=555
-[linkedin-url]: https://linkedin.com/in/othneildrew
+[contributors-shield]: https://img.shields.io/github/contributors/tijmenvandenbrink/enviroplus-exporter
+[contributors-url]: https://github.com/tijmenvandenbrink/enviroplus_exporter/graphs/contributors
+[forks-shield]: https://img.shields.io/github/forks/tijmenvandenbrink/enviroplus-exporter?label=Fork
+[forks-url]: https://github.com/tijmenvandenbrink/enviroplus_exporter/network/members
+[stars-shield]: https://img.shields.io/github/stars/tijmenvandenbrink/enviroplus-exporter
+[stars-url]: https://github.com/tijmenvandenbrink/enviroplus_exporter/stargazers
+[issues-shield]: https://img.shields.io/github/issues-raw/tijmenvandenbrink/enviroplus-exporter
+[issues-url]: https://github.com/tijmenvandenbrink/enviroplus_exporter/issues
+[license-shield]: https://img.shields.io/github/license/tijmenvandenbrink/enviroplus-exporter
+[license-url]: https://github.com/tijmenvandenbrink/enviroplus_exporter/blob/master/LICENSE
+[linkedin-shield]: https://img.shields.io/badge/-LinkedIn-black.svg&logo=linkedin&colorB=555
+[linkedin-url]: https://linkedin.com/in/tijmenvandenbrink
 [product-screenshot]: images/screenshot.png
