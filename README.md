@@ -30,7 +30,7 @@
 <br />
 <p align="center">
   <a href="https://github.com/tijmenvandenbrink/enviroplus_exporter">
-    <img src="logo/logo.png" alt="Logo" width="80" height="80">
+    <img src="logo/logo.png" alt="Logo" width="160" height="160">
   </a>
 
   <h3 align="center">Enviroplus-exporter</h3>
