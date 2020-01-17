@@ -1,0 +1,13 @@
+[Unit]
+Description=Environment exporter service
+After=network.target
+
+[Service]
+User=pi
+Group=pi
+WorkingDirectory=/usr/src/environment_exporter
+ExecStart=python /usr/src/environment_exporter/environment_exporter.py
+ExecReload=/bin/kill -HUP $MAINPID
+
+[Install]
+WantedBy=multi-user.target
