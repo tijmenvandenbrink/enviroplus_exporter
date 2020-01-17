@@ -1,0 +1,13 @@
+[Unit]
+Description=Enviroplus-exporter service
+After=network.target
+
+[Service]
+User=pi
+Group=pi
+WorkingDirectory=/usr/src/enviroplus_exporter
+ExecStart=python /usr/src/enviroplus_exporter/enviroplus_exporter.py --bind=0.0.0.0 --port=8000
+ExecReload=/bin/kill -HUP $MAINPID
+
+[Install]
+WantedBy=multi-user.target
