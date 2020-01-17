@@ -30,7 +30,7 @@
 <br />
 <p align="center">
   <a href="https://github.com/tijmenvandenbrink/enviroplus_exporter">
-    <img src="images/logo.png" alt="Logo" width="80" height="80">
+    <img src="logo/logo.png" alt="Logo" width="80" height="80">
   </a>
 
   <h3 align="center">Enviroplus-exporter</h3>
@@ -98,7 +98,7 @@ curl -sSL https://get.pimoroni.com/enviroplus | bash
 **Note** Raspbian Lite users may first need to install git: `sudo apt install git`
 
 ### Installation
-We're going to run the enviroplus-exporter as the user ```pi``` in the directory ```/usr/src/````. Adjust this as you wish.
+We're going to run the enviroplus-exporter as the user ```pi``` in the directory ```/usr/src/```. Adjust this as you wish.
  
 1.Clone the enviroplus-exporter repository
 ```sh
