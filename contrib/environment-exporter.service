@@ -6,7 +6,7 @@ After=network.target
 User=pi
 Group=pi
 WorkingDirectory=/usr/src/environment_exporter
-ExecStart=python /usr/src/environment_exporter/environment_exporter.py
+ExecStart=python /usr/src/environment_exporter/environment_exporter.py --bind=0.0.0.0 --port=8000
 ExecReload=/bin/kill -HUP $MAINPID
 
 [Install]

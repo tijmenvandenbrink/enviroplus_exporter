@@ -2,6 +2,7 @@
 import random
 import time
 import logging
+import argparse
 
 from prometheus_client import start_http_server, Gauge, Histogram
 
@@ -25,7 +26,7 @@ logging.basicConfig(
     level=logging.INFO,
     datefmt='%Y-%m-%d %H:%M:%S')
 
-logging.info("""enviroplus_exporter.py - Print readings from the Enviro+ sensor by Pimoroni.
+logging.info("""enviroplus_exporter.py - Expose readings from the Enviro+ sensor by Pimoroni in Prometheus format
 
 Press Ctrl+C to exit!
 
@@ -52,20 +53,22 @@ def get_cpu_temperature():
         temp = int(temp) / 1000.0
     return temp
 
-def get_temperature():
+def get_temperature(factor):
     """Get temperature from the weather sensor"""
     # Tuning factor for compensation. Decrease this number to adjust the
     # temperature down, and increase to adjust up
-    factor = 0.85
-
-    cpu_temps = [get_cpu_temperature()] * 5
-
-    cpu_temp = get_cpu_temperature()
-    # Smooth out with some averaging to decrease jitter
-    cpu_temps = cpu_temps[1:] + [cpu_temp]
-    avg_cpu_temp = sum(cpu_temps) / float(len(cpu_temps))
     raw_temp = bme280.get_temperature()
-    temperature = raw_temp - ((avg_cpu_temp - raw_temp) / factor)
+
+    if factor:
+        cpu_temps = [get_cpu_temperature()] * 5
+        cpu_temp = get_cpu_temperature()
+        # Smooth out with some averaging to decrease jitter
+        cpu_temps = cpu_temps[1:] + [cpu_temp]
+        avg_cpu_temp = sum(cpu_temps) / float(len(cpu_temps))
+        temperature = raw_temp - ((avg_cpu_temp - raw_temp) / factor)
+    else:
+        temperature = raw_temp
+
     TEMPERATURE.set(temperature)   # Set to a given value
 
 def get_pressure():
@@ -98,12 +101,24 @@ def get_light():
 
 
 if __name__ == '__main__':
-# Start up the server to expose the metrics.
-    start_http_server(addr='0.0.0.0', port=8000)
+    parser = argparse.ArgumentParser()
+    parser.add_argument("-b", "--bind", metavar='ADDRESS', default='0.0.0.0', help="Specify alternate bind address [default: 0.0.0.0]")
+    parser.add_argument("-p", "--port", metavar='PORT', default=8000, type=int, help="Specify alternate port [default: 8000]")
+    parser.add_argument("-f", "--factor", metavar='FACTOR', type=float, help="The compensation factor to get better temperature results when the Enviro+ pHAT is too close to the Raspberry Pi board")
+    args = parser.parse_args()
+
+    # Start up the server to expose the metrics.
+    start_http_server(addr=args.bind, port=args.port)
     # Generate some requests.
+    
+    if args.factor:
+        logging.info("Using compensating algorithm (factor={}) to account for heat leakage from Raspberry Pi board".format(args.factor))
+
+    logging.info("Listening on http://{}:{}".format(args.bind, args.port))
+
 
     while True:
-        get_temperature()
+        get_temperature(args.factor)
         get_pressure()
         get_humidity()
         get_gas()
