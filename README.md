@@ -220,13 +220,13 @@ I published the dashboard on [grafana.com](https://grafana.com/grafana/dashboard
 
 <p align="center">
   <a href="https://github.com/tijmenvandenbrink/enviroplus_exporter">
-    <img src="images/grafana_dashboard_1" alt="Grafana Dashboard 1" width="480" height="320">
+    <img src="images/grafana_dashboard_1.png" alt="Grafana Dashboard 1" width="480" height="320">
   </a>
   <a href="https://github.com/tijmenvandenbrink/enviroplus_exporter">
-    <img src="images/grafana_dashboard_2" alt="Grafana Dashboard 2" width="480" height="320">
+    <img src="images/grafana_dashboard_2.png" alt="Grafana Dashboard 2" width="480" height="320">
   </a>
   <a href="https://github.com/tijmenvandenbrink/enviroplus_exporter">
-    <img src="images/grafana_dashboard_3" alt="Grafana Dashboard 3" width="480" height="320">
+    <img src="images/grafana_dashboard_3.png" alt="Grafana Dashboard 3" width="480" height="320">
   </a>
 </p>
 
