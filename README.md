@@ -216,8 +216,19 @@ I added two labels to the targets ```group: environment``` and ```location: Some
 
 ### Grafana
 
-I will publish a Grafana Dashboard shortly.
+I published the dashboard on [grafana.com](https://grafana.com/grafana/dashboards/11605). You can import this dashboard using the the ID 11605. Instructions for importing the dashboard can be found [here](https://grafana.com/docs/grafana/latest/reference/export_import/).
 
+<p align="center">
+  <a href="https://github.com/tijmenvandenbrink/enviroplus_exporter">
+    <img src="images/grafana_dashboard_1" alt="Grafana Dashboard 1" width="480" height="320">
+  </a>
+  <a href="https://github.com/tijmenvandenbrink/enviroplus_exporter">
+    <img src="images/grafana_dashboard_2" alt="Grafana Dashboard 2" width="480" height="320">
+  </a>
+  <a href="https://github.com/tijmenvandenbrink/enviroplus_exporter">
+    <img src="images/grafana_dashboard_3" alt="Grafana Dashboard 3" width="480" height="320">
+  </a>
+</p>
 
 <!-- ROADMAP -->
 ## Roadmap
