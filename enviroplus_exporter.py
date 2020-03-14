@@ -8,6 +8,7 @@ from prometheus_client import start_http_server, Gauge, Histogram
 
 from bme280 import BME280
 from enviroplus import gas
+from pms5003 import PMS5003, ReadTimeoutError as pmsReadTimeoutError
 
 try:
     from smbus2 import SMBus
@@ -34,6 +35,7 @@ Press Ctrl+C to exit!
 
 bus = SMBus(1)
 bme280 = BME280(i2c_dev=bus)
+pms5003 = PMS5003()
 
 TEMPERATURE = Gauge('temperature','Temperature measured (*C)')
 PRESSURE = Gauge('pressure','Pressure measured (hPa)')
@@ -43,6 +45,9 @@ REDUCING = Gauge('reducing', 'Mostly carbon monoxide but could include H2S, Ammo
 NH3 = Gauge('NH3', 'mostly Ammonia but could also include Hydrogen, Ethanol, Propane, Iso-butane (Ohms)') 
 LUX = Gauge('lux', 'current ambient light level (lux)')
 PROXIMITY = Gauge('proximity', 'proximity, with larger numbers being closer proximity and vice versa')
+PM1 = Gauge('PM1', 'Particulate Matter of diameter less than 1 micron. Measured in micrograms per cubic metre (ug/m3)')
+PM25 = Gauge('PM25', 'Particulate Matter of diameter less than 2.5 microns. Measured in micrograms per cubic metre (ug/m3)')
+PM10 = Gauge('PM10', 'Particulate Matter of diameter less than 10 microns. Measured in micrograms per cubic metre (ug/m3)')
 
 OXIDISING_HIST = Histogram('oxidising_measurements', 'Histogram of oxidising measurements', buckets=(0, 10000, 15000, 20000, 25000, 30000, 35000, 40000, 45000, 50000, 55000, 60000, 65000, 70000, 75000, 80000, 85000, 90000, 100000))
 REDUCING_HIST = Histogram('reducing_measurements', 'Histogram of reducing measurements', buckets=(0, 100000, 200000, 300000, 400000, 500000, 600000, 700000, 800000, 900000, 1000000, 1100000, 1200000, 1300000, 1400000, 1500000))
@@ -104,6 +109,17 @@ def get_light():
     LUX.set(lux)
     PROXIMITY.set(prox)
 
+def get_particulates():
+    """Get the particulate matter readings"""
+    try:
+        pms_data = pms5003.read()
+    except pmsReadTimeoutError:
+        logging.warn("Failed to read PMS5003")
+    else:
+        PM1.set(pms_data.pm_ug_per_m3(1.0))
+        PM25.set(pms_data.pm_ug_per_m3(2.5))
+        PM10.set(pms_data.pm_ug_per_m3(10))
+
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()
@@ -128,3 +144,4 @@ if __name__ == '__main__':
         get_humidity()
         get_gas()
         get_light()
+        get_particulates()
