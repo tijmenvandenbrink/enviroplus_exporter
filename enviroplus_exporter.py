@@ -4,6 +4,7 @@ import random
 import time
 import logging
 import argparse
+from threading import Thread
 
 from influxdb_client import InfluxDBClient
 from prometheus_client import start_http_server, Gauge, Histogram
