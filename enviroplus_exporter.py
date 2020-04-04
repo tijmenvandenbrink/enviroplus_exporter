@@ -6,7 +6,8 @@ import logging
 import argparse
 from threading import Thread
 
-from influxdb_client import InfluxDBClient
+from influxdb_client import InfluxDBClient, Point
+from influxdb_client.client.write_api import SYNCHRONOUS
 from prometheus_client import start_http_server, Gauge, Histogram
 
 from bme280 import BME280
@@ -60,10 +61,12 @@ NH3_HIST = Histogram('nh3_measurements', 'Histogram of nh3 measurements', bucket
 # You can generate an InfluxDB Token from the Tokens Tab in the InfluxDB Cloud UI
 INFLUXDB_URL = os.getenv('INFLUXDB_URL', '')
 INFLUXDB_TOKEN = os.getenv('INFLUXDB_TOKEN', '')
-INFLUXDB_BUCKETID = os.getenv('INFLUXDB_BUCKETID', '')
+INFLUXDB_ORG_ID = os.getenv('INFLUXDB_ORG_ID', '')
+INFLUXDB_BUCKET = os.getenv('INFLUXDB_BUCKET', '')
+INFLUXDB_SENSOR_LOCATION = os.getenv('INFLUXDB_SENSOR_LOCATION', 'Adelaide')
 INFLUXDB_TIME_BETWEEN_POSTS = int(os.getenv('INFLUXDB_TIME_BETWEEN_POSTS', '5'))
-influxdb_client = InfluxDBClient(url=INFLUXDB_URL, token=INFLUXDB_TOKEN)
-influxdb_api = influxdb_client.write_api()
+influxdb_client = InfluxDBClient(url=INFLUXDB_URL, token=INFLUXDB_TOKEN, org=INFLUXDB_ORG_ID)
+influxdb_api = influxdb_client.write_api(write_options=SYNCHRONOUS)
 
 # Get the temperature of the CPU for compensation
 def get_cpu_temperature():
@@ -140,7 +143,7 @@ def post_to_influxdb():
         name = 'enviroplus'
         tag = ['location', 'adelaide']
         fields = {}
-        sequence = []
+        data_points = []
         epoch_time_now = round(time.time())
         fields['temperature'] = TEMPERATURE.collect()[0].samples[0].value
         fields['humidity'] = HUMIDITY.collect()[0].samples[0].value
@@ -154,8 +157,8 @@ def post_to_influxdb():
         fields['pm25'] = PM25.collect()[0].samples[0].value
         fields['pm10'] = PM10.collect()[0].samples[0].value
         for field_name in fields:
-            sequence.append(f'{name},{tag[0]}={tag[1]} {field_name}={fields[field_name]} {epoch_time_now}')
-        influxdb_api.write('bucketID', INFLUXDB_BUCKETID, sequence)
+            data_points.append(Point('enviroplus').tag('location', INFLUXDB_SENSOR_LOCATION).field(field_name, fields[field_name]))
+        influxdb_api.write(bucket=INFLUXDB_BUCKET, record=data_points)
 
 
 def str_to_bool(value):
