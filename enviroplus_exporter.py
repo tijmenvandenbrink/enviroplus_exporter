@@ -71,7 +71,6 @@ influxdb_api = influxdb_client.write_api(write_options=SYNCHRONOUS)
 
 # Setup Luftdaten
 LUFTDATEN_TIME_BETWEEN_POSTS = int(os.getenv('LUFTDATEN_TIME_BETWEEN_POSTS', '30'))
-LUFTDATEN_SENSOR_UID = os.getenv('LUFTDATEN_SENSOR_UID', '')
 
 # Get the temperature of the CPU for compensation
 def get_cpu_temperature():
@@ -178,11 +177,16 @@ def post_to_luftdaten():
     while True:
         time.sleep(LUFTDATEN_TIME_BETWEEN_POSTS)
         sensor_data = collect_all_data()
-        pm_values = dict(i for i in sensor_data.items() if i[0].startswith('pm'))
-        temperature_values = dict(i for i in sensor_data.items() if not i[0].startswith('pm'))
+        values = {}
+        values["P2"] = sensor_data['pm25']
+        values["P1"] = sensor_data['pm10']
+        values["temperature"] = "{:.2f}".format(sensor_data['temperature'])
+        values["pressure"] = "{:.2f}".format(sensor_data['pressure'] * 100)
+        values["humidity"] = "{:.2f}".format(sensor_data['humidity'])
+        pm_values = dict(i for i in values.items() if i[0].startswith('P'))
+        temperature_values = dict(i for i in values.items() if not i[0].startswith('P'))
         try:
-            if not LUFTDATEN_SENSOR_UID:
-                LUFTDATEN_SENSOR_UID = 'raspi-' + get_serial_number()
+            LUFTDATEN_SENSOR_UID = 'raspi-' + get_serial_number()
             response_pin_1 = requests.post('https://api.luftdaten.info/v1/push-sensor-data/',
                 json={
                     "software_version": "enviro-plus 0.0.1",
