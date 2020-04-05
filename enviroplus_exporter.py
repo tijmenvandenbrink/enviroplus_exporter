@@ -172,7 +172,7 @@ def post_to_influxdb():
         influxdb_api.write(bucket=INFLUXDB_BUCKET, record=data_points)
 
 
-def post_to_luftdaten(parameter_list):
+def post_to_luftdaten():
     """Post relevant sensor data to luftdaten.info"""
     """Code from: https://github.com/sepulworld/balena-environ-plus"""
     while True:
