@@ -168,7 +168,7 @@ def post_to_influxdb():
         epoch_time_now = round(time.time())
         sensor_data = collect_all_data()
         for field_name in sensor_data:
-            data_points.append(Point('enviroplus').tag('location', INFLUXDB_SENSOR_LOCATION).field(field_name, fields[field_name]))
+            data_points.append(Point('enviroplus').tag('location', INFLUXDB_SENSOR_LOCATION).field(field_name, sensor_data[field_name]))
         influxdb_api.write(bucket=INFLUXDB_BUCKET, record=data_points)
 
 
@@ -216,7 +216,7 @@ def post_to_luftdaten():
             else:
                 logging.warn('Luftdaten response: Failed')
         except Exception as exception:
-            logger.error('Exception sending to Luftdaten: {}'.format(exception))
+            logging.warn('Exception sending to Luftdaten: {}'.format(exception))
 
 
 def get_serial_number():
