@@ -166,7 +166,7 @@ def str_to_bool(value):
         return False
     elif value.lower() in {'true', 't', '1', 'yes', 'y'}:
         return True
-    raise ValueError(f'{value} is not a valid boolean value')
+    raise ValueError('{} is not a valid boolean value'.format(value))
 
 
 if __name__ == '__main__':
