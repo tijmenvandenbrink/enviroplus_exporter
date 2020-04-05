@@ -71,6 +71,7 @@ influxdb_api = influxdb_client.write_api(write_options=SYNCHRONOUS)
 
 # Setup Luftdaten
 LUFTDATEN_TIME_BETWEEN_POSTS = int(os.getenv('LUFTDATEN_TIME_BETWEEN_POSTS', '30'))
+LUFTDATEN_SENSOR_UID = 'raspi-' + get_serial_number()
 
 # Get the temperature of the CPU for compensation
 def get_cpu_temperature():
@@ -186,7 +187,6 @@ def post_to_luftdaten():
         pm_values = dict(i for i in values.items() if i[0].startswith('P'))
         temperature_values = dict(i for i in values.items() if not i[0].startswith('P'))
         try:
-            LUFTDATEN_SENSOR_UID = 'raspi-' + get_serial_number()
             response_pin_1 = requests.post('https://api.luftdaten.info/v1/push-sensor-data/',
                 json={
                     "software_version": "enviro-plus 0.0.1",
@@ -263,7 +263,7 @@ if __name__ == '__main__':
 
     if args.luftdaten:
         # Post to Luftdaten in another thread
-        logging.info("Sensor data will be posted to Luftdaten every {} seconds".format(LUFTDATEN_TIME_BETWEEN_POSTS))
+        logging.info("Sensor data will be posted to Luftdaten every {} seconds for the UID {}".format(LUFTDATEN_TIME_BETWEEN_POSTS, LUFTDATEN_SENSOR_UID))
         luftdaten_thread = Thread(target=post_to_luftdaten)
         luftdaten_thread.start()
 
