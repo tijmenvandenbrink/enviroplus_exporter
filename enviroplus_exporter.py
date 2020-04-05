@@ -71,7 +71,6 @@ influxdb_api = influxdb_client.write_api(write_options=SYNCHRONOUS)
 
 # Setup Luftdaten
 LUFTDATEN_TIME_BETWEEN_POSTS = int(os.getenv('LUFTDATEN_TIME_BETWEEN_POSTS', '30'))
-LUFTDATEN_SENSOR_UID = 'raspi-' + get_serial_number()
 
 # Get the temperature of the CPU for compensation
 def get_cpu_temperature():
@@ -140,7 +139,6 @@ def get_particulates():
         PM25.set(pms_data.pm_ug_per_m3(2.5))
         PM10.set(pms_data.pm_ug_per_m3(10))
 
-
 def collect_all_data():
     """Collects all the data currently set"""
     sensor_data = {}
@@ -157,7 +155,6 @@ def collect_all_data():
     sensor_data['pm10'] = PM10.collect()[0].samples[0].value
     return sensor_data
 
-
 def post_to_influxdb():
     """Post all sensor data to InfluxDB"""
     while True:
@@ -170,7 +167,6 @@ def post_to_influxdb():
         for field_name in sensor_data:
             data_points.append(Point('enviroplus').tag('location', INFLUXDB_SENSOR_LOCATION).field(field_name, sensor_data[field_name]))
         influxdb_api.write(bucket=INFLUXDB_BUCKET, record=data_points)
-
 
 def post_to_luftdaten():
     """Post relevant sensor data to luftdaten.info"""
@@ -187,6 +183,7 @@ def post_to_luftdaten():
         pm_values = dict(i for i in values.items() if i[0].startswith('P'))
         temperature_values = dict(i for i in values.items() if not i[0].startswith('P'))
         try:
+            LUFTDATEN_SENSOR_UID = 'raspi-' + get_serial_number()
             response_pin_1 = requests.post('https://api.luftdaten.info/v1/push-sensor-data/',
                 json={
                     "software_version": "enviro-plus 0.0.1",
@@ -222,14 +219,12 @@ def post_to_luftdaten():
         except Exception as exception:
             logging.warn('Exception sending to Luftdaten: {}'.format(exception))
 
-
 def get_serial_number():
     """Get Raspberry Pi serial number to use as LUFTDATEN_SENSOR_UID"""
     with open('/proc/cpuinfo', 'r') as f:
         for line in f:
             if line[0:6] == 'Serial':
                 return str(line.split(":")[1].strip())
-
 
 def str_to_bool(value):
     if value.lower() in {'false', 'f', '0', 'no', 'n'}:
@@ -263,6 +258,7 @@ if __name__ == '__main__':
 
     if args.luftdaten:
         # Post to Luftdaten in another thread
+        LUFTDATEN_SENSOR_UID = 'raspi-' + get_serial_number()
         logging.info("Sensor data will be posted to Luftdaten every {} seconds for the UID {}".format(LUFTDATEN_TIME_BETWEEN_POSTS, LUFTDATEN_SENSOR_UID))
         luftdaten_thread = Thread(target=post_to_luftdaten)
         luftdaten_thread.start()
