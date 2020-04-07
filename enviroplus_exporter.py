@@ -38,6 +38,8 @@ Press Ctrl+C to exit!
 
 """)
 
+DEBUG = os.getenv('DEBUG', 'false') == 'true'
+
 bus = SMBus(1)
 bme280 = BME280(i2c_dev=bus)
 pms5003 = PMS5003()
@@ -133,7 +135,7 @@ def get_particulates():
     try:
         pms_data = pms5003.read()
     except pmsReadTimeoutError:
-        logging.warn("Failed to read PMS5003")
+        logging.warning("Failed to read PMS5003")
     else:
         PM1.set(pms_data.pm_ug_per_m3(1.0))
         PM25.set(pms_data.pm_ug_per_m3(2.5))
@@ -157,20 +159,26 @@ def collect_all_data():
 
 def post_to_influxdb():
     """Post all sensor data to InfluxDB"""
+    name = 'enviroplus'
+    tag = ['location', 'adelaide']
     while True:
         time.sleep(INFLUXDB_TIME_BETWEEN_POSTS)
-        name = 'enviroplus'
-        tag = ['location', 'adelaide']
         data_points = []
         epoch_time_now = round(time.time())
         sensor_data = collect_all_data()
         for field_name in sensor_data:
             data_points.append(Point('enviroplus').tag('location', INFLUXDB_SENSOR_LOCATION).field(field_name, sensor_data[field_name]))
-        influxdb_api.write(bucket=INFLUXDB_BUCKET, record=data_points)
+        try:
+            influxdb_api.write(bucket=INFLUXDB_BUCKET, record=data_points)
+            if DEBUG:
+                logging.info('InfluxDB response: OK')
+        except Exception as exception:
+            logging.warning('Exception sending to InfluxDB: {}'.format(exception))
 
 def post_to_luftdaten():
     """Post relevant sensor data to luftdaten.info"""
     """Code from: https://github.com/sepulworld/balena-environ-plus"""
+    LUFTDATEN_SENSOR_UID = 'raspi-' + get_serial_number()
     while True:
         time.sleep(LUFTDATEN_TIME_BETWEEN_POSTS)
         sensor_data = collect_all_data()
@@ -183,7 +191,6 @@ def post_to_luftdaten():
         pm_values = dict(i for i in values.items() if i[0].startswith('P'))
         temperature_values = dict(i for i in values.items() if not i[0].startswith('P'))
         try:
-            LUFTDATEN_SENSOR_UID = 'raspi-' + get_serial_number()
             response_pin_1 = requests.post('https://api.luftdaten.info/v1/push-sensor-data/',
                 json={
                     "software_version": "enviro-plus 0.0.1",
@@ -213,11 +220,12 @@ def post_to_luftdaten():
             )
 
             if response_pin_1.ok and response_pin_11.ok:
-                logging.info('Luftdaten response: OK')
+                if DEBUG:
+                    logging.info('Luftdaten response: OK')
             else:
-                logging.warn('Luftdaten response: Failed')
+                logging.warning('Luftdaten response: Failed')
         except Exception as exception:
-            logging.warn('Exception sending to Luftdaten: {}'.format(exception))
+            logging.warning('Exception sending to Luftdaten: {}'.format(exception))
 
 def get_serial_number():
     """Get Raspberry Pi serial number to use as LUFTDATEN_SENSOR_UID"""
@@ -272,3 +280,5 @@ if __name__ == '__main__':
         get_gas()
         get_light()
         get_particulates()
+        if DEBUG:
+            logging.info('Sensor data: {}'.format(collect_all_data()))
