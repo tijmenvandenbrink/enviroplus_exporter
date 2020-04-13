@@ -255,14 +255,13 @@ def post_to_safecast():
     while True:
         time.sleep(SAFECAST_TIME_BETWEEN_POSTS)
         sensor_data = collect_all_data()
-        sensor_data['timestamp'] = datetime.datetime.now().astimezone().isoformat()
         try:
             measurement = safecast.add_measurement(json={
                 'latitude': SAFECAST_LATITUDE,
                 'longitude': SAFECAST_LONGITUDE,
                 'value': sensor_data['pm1'],
                 'unit': 'PM1 ug/m3',
-                'captured_at': sensor_data['timestamp'],
+                'captured_at': datetime.datetime.now().astimezone().isoformat(),
                 'device_id': SAFECAST_DEVICE_ID,  # Enviro+
                 'location_name': SAFECAST_LOCATION_NAME,
                 'height': None
@@ -275,7 +274,7 @@ def post_to_safecast():
                 'longitude': SAFECAST_LONGITUDE,
                 'value': sensor_data['pm25'],
                 'unit': 'PM2.5 ug/m3',
-                'captured_at': sensor_data['timestamp'],
+                'captured_at': datetime.datetime.now().astimezone().isoformat(),
                 'device_id': SAFECAST_DEVICE_ID,  # Enviro+
                 'location_name': SAFECAST_LOCATION_NAME,
                 'height': None
@@ -288,7 +287,7 @@ def post_to_safecast():
                 'longitude': SAFECAST_LONGITUDE,
                 'value': sensor_data['pm10'],
                 'unit': 'PM10 ug/m3',
-                'captured_at': sensor_data['timestamp'],
+                'captured_at': datetime.datetime.now().astimezone().isoformat(),
                 'device_id': SAFECAST_DEVICE_ID,  # Enviro+
                 'location_name': SAFECAST_LOCATION_NAME,
                 'height': None
@@ -301,7 +300,7 @@ def post_to_safecast():
                 'longitude': SAFECAST_LONGITUDE,
                 'value': sensor_data['temperature'],
                 'unit': 'Temperature C',
-                'captured_at': sensor_data['timestamp'],
+                'captured_at': datetime.datetime.now().astimezone().isoformat(),
                 'device_id': SAFECAST_DEVICE_ID,  # Enviro+
                 'location_name': SAFECAST_LOCATION_NAME,
                 'height': None
@@ -314,7 +313,7 @@ def post_to_safecast():
                 'longitude': SAFECAST_LONGITUDE,
                 'value': sensor_data['humidity'],
                 'unit': 'Humidity %',
-                'captured_at': sensor_data['timestamp'],
+                'captured_at': datetime.datetime.now().astimezone().isoformat(),
                 'device_id': SAFECAST_DEVICE_ID,  # Enviro+
                 'location_name': SAFECAST_LOCATION_NAME,
                 'height': None
