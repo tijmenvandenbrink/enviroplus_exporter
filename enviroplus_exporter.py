@@ -1,4 +1,5 @@
 #!/usr/bin/env python
+import datetime
 import os
 import random
 import requests
@@ -10,6 +11,7 @@ from threading import Thread
 from influxdb_client import InfluxDBClient, Point
 from influxdb_client.client.write_api import SYNCHRONOUS
 from prometheus_client import start_http_server, Gauge, Histogram
+import SafecastPy
 
 from bme280 import BME280
 from enviroplus import gas
@@ -73,6 +75,27 @@ influxdb_api = influxdb_client.write_api(write_options=SYNCHRONOUS)
 
 # Setup Luftdaten
 LUFTDATEN_TIME_BETWEEN_POSTS = int(os.getenv('LUFTDATEN_TIME_BETWEEN_POSTS', '30'))
+
+# Setup Safecast
+SAFECAST_TIME_BETWEEN_POSTS = int(os.getenv('SAFECAST_TIME_BETWEEN_POSTS', '300'))
+SAFECAST_DEV_MODE = os.getenv('SAFECAST_DEV_MODE', 'false') == 'true'
+SAFECAST_API_KEY = os.getenv('SAFECAST_API_KEY', '')
+SAFECAST_API_KEY_DEV = os.getenv('SAFECAST_API_KEY_DEV', '')
+SAFECAST_LATITUDE = os.getenv('SAFECAST_LATITUDE', '')
+SAFECAST_LONGITUDE = os.getenv('SAFECAST_LONGITUDE', '')
+SAFECAST_DEVICE_ID = int(os.getenv('SAFECAST_DEVICE_ID', '226'))
+SAFECAST_LOCATION_NAME = os.getenv('SAFECAST_LOCATION_NAME', '')
+if SAFECAST_DEV_MODE:
+    # Post to the dev API
+    safecast = SafecastPy.SafecastPy(
+        api_key=SAFECAST_API_KEY_DEV,
+        api_url=SafecastPy.DEVELOPMENT_API_URL,
+    )
+else:
+    # Post to the production API
+    safecast = SafecastPy.SafecastPy(
+        api_key=SAFECAST_API_KEY,
+    )
 
 # Get the temperature of the CPU for compensation
 def get_cpu_temperature():
@@ -227,6 +250,80 @@ def post_to_luftdaten():
         except Exception as exception:
             logging.warning('Exception sending to Luftdaten: {}'.format(exception))
 
+def post_to_safecast():
+    """Post all sensor data to Safecast.org"""
+    while True:
+        time.sleep(SAFECAST_TIME_BETWEEN_POSTS)
+        sensor_data = collect_all_data()
+        sensor_data['timestamp'] = datetime.datetime.now().astimezone().isoformat()
+        try:
+            measurement = safecast.add_measurement(json={
+                'latitude': SAFECAST_LATITUDE,
+                'longitude': SAFECAST_LONGITUDE,
+                'value': sensor_data['pm1'],
+                'unit': 'PM1 ug/m3',
+                'captured_at': sensor_data['timestamp'],
+                'device_id': SAFECAST_DEVICE_ID,  # Enviro+
+                'location_name': SAFECAST_LOCATION_NAME,
+                'height': None
+            })
+            if DEBUG:
+                logging.info('Safecast PM1 measurement created, id: {}'.format(measurement['id']))
+
+            measurement = safecast.add_measurement(json={
+                'latitude': SAFECAST_LATITUDE,
+                'longitude': SAFECAST_LONGITUDE,
+                'value': sensor_data['pm25'],
+                'unit': 'PM2.5 ug/m3',
+                'captured_at': sensor_data['timestamp'],
+                'device_id': SAFECAST_DEVICE_ID,  # Enviro+
+                'location_name': SAFECAST_LOCATION_NAME,
+                'height': None
+            })
+            if DEBUG:
+                logging.info('Safecast PM2.5 measurement created, id: {}'.format(measurement['id']))
+
+            measurement = safecast.add_measurement(json={
+                'latitude': SAFECAST_LATITUDE,
+                'longitude': SAFECAST_LONGITUDE,
+                'value': sensor_data['pm10'],
+                'unit': 'PM10 ug/m3',
+                'captured_at': sensor_data['timestamp'],
+                'device_id': SAFECAST_DEVICE_ID,  # Enviro+
+                'location_name': SAFECAST_LOCATION_NAME,
+                'height': None
+            })
+            if DEBUG:
+                logging.info('Safecast PM10 measurement created, id: {}'.format(measurement['id']))
+
+            measurement = safecast.add_measurement(json={
+                'latitude': SAFECAST_LATITUDE,
+                'longitude': SAFECAST_LONGITUDE,
+                'value': sensor_data['temperature'],
+                'unit': 'Temperature C',
+                'captured_at': sensor_data['timestamp'],
+                'device_id': SAFECAST_DEVICE_ID,  # Enviro+
+                'location_name': SAFECAST_LOCATION_NAME,
+                'height': None
+            })
+            if DEBUG:
+                logging.info('Safecast Temperature measurement created, id: {}'.format(measurement['id']))
+
+            measurement = safecast.add_measurement(json={
+                'latitude': SAFECAST_LATITUDE,
+                'longitude': SAFECAST_LONGITUDE,
+                'value': sensor_data['humidity'],
+                'unit': 'Humidity %',
+                'captured_at': sensor_data['timestamp'],
+                'device_id': SAFECAST_DEVICE_ID,  # Enviro+
+                'location_name': SAFECAST_LOCATION_NAME,
+                'height': None
+            })
+            if DEBUG:
+                logging.info('Safecast Humidity measurement created, id: {}'.format(measurement['id']))
+        except Exception as exception:
+            logging.warning('Exception sending to Safecast: {}'.format(exception))
+
 def get_serial_number():
     """Get Raspberry Pi serial number to use as LUFTDATEN_SENSOR_UID"""
     with open('/proc/cpuinfo', 'r') as f:
@@ -248,8 +345,9 @@ if __name__ == '__main__':
     parser.add_argument("-p", "--port", metavar='PORT', default=8000, type=int, help="Specify alternate port [default: 8000]")
     parser.add_argument("-f", "--factor", metavar='FACTOR', type=float, help="The compensation factor to get better temperature results when the Enviro+ pHAT is too close to the Raspberry Pi board")
     parser.add_argument("-d", "--debug", metavar='DEBUG', type=str_to_bool, help="Turns on more vebose logging, showing sensor output and post responses [default: false]")
-    parser.add_argument("-i", "--influxdb", metavar='INFLUXDB', type=str_to_bool, default='false', help="Post sensor data to InfluxDB [default: false]")
-    parser.add_argument("-l", "--luftdaten", metavar='LUFTDATEN', type=str_to_bool, default='false', help="Post sensor data to Luftdaten [default: false]")
+    parser.add_argument("-i", "--influxdb", metavar='INFLUXDB', type=str_to_bool, default='false', help="Post sensor data to InfluxDB Cloud [default: false]")
+    parser.add_argument("-l", "--luftdaten", metavar='LUFTDATEN', type=str_to_bool, default='false', help="Post sensor data to Luftdaten.info [default: false]")
+    parser.add_argument("-s", "--safecast", metavar='SAFECAST', type=str_to_bool, default='false', help="Post sensor data to Safecast.org [default: false]")
     args = parser.parse_args()
 
     # Start up the server to expose the metrics.
@@ -274,6 +372,15 @@ if __name__ == '__main__':
         logging.info("Sensor data will be posted to Luftdaten every {} seconds for the UID {}".format(LUFTDATEN_TIME_BETWEEN_POSTS, LUFTDATEN_SENSOR_UID))
         luftdaten_thread = Thread(target=post_to_luftdaten)
         luftdaten_thread.start()
+
+    if args.safecast:
+        # Post to Safecast in another thread
+        safecast_api_url = SafecastPy.PRODUCTION_API_URL
+        if SAFECAST_DEV_MODE:
+            safecast_api_url = SafecastPy.DEVELOPMENT_API_URL
+        logging.info("Sensor data will be posted to {} every {} seconds".format(safecast_api_url, SAFECAST_TIME_BETWEEN_POSTS))
+        influx_thread = Thread(target=post_to_safecast)
+        influx_thread.start()
 
     logging.info("Listening on http://{}:{}".format(args.bind, args.port))
 
