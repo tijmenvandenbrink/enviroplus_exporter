@@ -12,7 +12,7 @@ from influxdb_client import InfluxDBClient, Point
 from influxdb_client.client.write_api import SYNCHRONOUS
 from prometheus_client import start_http_server, Gauge, Histogram
 import SafecastPy
-import notecard
+import notecard.notecard.notecard as notecard
 from periphery import Serial
 
 from bme280 import BME280
