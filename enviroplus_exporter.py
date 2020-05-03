@@ -328,7 +328,7 @@ def post_to_safecast():
         except Exception as exception:
             logging.warning('Exception sending to Safecast: {}'.format(exception))
 
-def post_to_notehub(card):
+def post_to_notehub():
     """Post all sensor data to Notehub.io"""
     while True:
         time.sleep(NOTECARD_TIME_BETWEEN_POSTS)
