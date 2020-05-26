@@ -59,6 +59,7 @@ PROXIMITY = Gauge('proximity', 'proximity, with larger numbers being closer prox
 PM1 = Gauge('PM1', 'Particulate Matter of diameter less than 1 micron. Measured in micrograms per cubic metre (ug/m3)')
 PM25 = Gauge('PM25', 'Particulate Matter of diameter less than 2.5 microns. Measured in micrograms per cubic metre (ug/m3)')
 PM10 = Gauge('PM10', 'Particulate Matter of diameter less than 10 microns. Measured in micrograms per cubic metre (ug/m3)')
+CPU_TEMPERATURE = Gauge('cpu_temperature','CPU temperature measured (*C)')
 
 OXIDISING_HIST = Histogram('oxidising_measurements', 'Histogram of oxidising measurements', buckets=(0, 10000, 15000, 20000, 25000, 30000, 35000, 40000, 45000, 50000, 55000, 60000, 65000, 70000, 75000, 80000, 85000, 90000, 100000))
 REDUCING_HIST = Histogram('reducing_measurements', 'Histogram of reducing measurements', buckets=(0, 100000, 200000, 300000, 400000, 500000, 600000, 700000, 800000, 900000, 1000000, 1100000, 1200000, 1300000, 1400000, 1500000))
@@ -102,12 +103,12 @@ else:
 # Setup Blues Notecard
 NOTECARD_TIME_BETWEEN_POSTS = int(os.getenv('NOTECARD_TIME_BETWEEN_POSTS', '600'))
 
-# Get the temperature of the CPU for compensation
 def get_cpu_temperature():
+    """Get the temperature from the Raspberry Pi CPU"""
     with open("/sys/class/thermal/thermal_zone0/temp", "r") as f:
         temp = f.read()
         temp = int(temp) / 1000.0
-    return temp
+    CPU_TEMPERATURE.set(temp)
 
 def get_temperature(factor):
     """Get temperature from the weather sensor"""
@@ -116,12 +117,7 @@ def get_temperature(factor):
     raw_temp = bme280.get_temperature()
 
     if factor:
-        cpu_temps = [get_cpu_temperature()] * 5
-        cpu_temp = get_cpu_temperature()
-        # Smooth out with some averaging to decrease jitter
-        cpu_temps = cpu_temps[1:] + [cpu_temp]
-        avg_cpu_temp = sum(cpu_temps) / float(len(cpu_temps))
-        temperature = raw_temp - ((avg_cpu_temp - raw_temp) / factor)
+        temperature = raw_temp - factor
     else:
         temperature = raw_temp
 
@@ -183,6 +179,7 @@ def collect_all_data():
     sensor_data['pm1'] = PM1.collect()[0].samples[0].value
     sensor_data['pm25'] = PM25.collect()[0].samples[0].value
     sensor_data['pm10'] = PM10.collect()[0].samples[0].value
+    sensor_data['cpu_temperature'] = CPU_TEMPERATURE.collect()[0].samples[0].value
     return sensor_data
 
 def post_to_influxdb():
@@ -325,6 +322,19 @@ def post_to_safecast():
             })
             if DEBUG:
                 logging.info('Safecast Humidity measurement created, id: {}'.format(measurement['id']))
+
+            measurement = safecast.add_measurement(json={
+                'latitude': SAFECAST_LATITUDE,
+                'longitude': SAFECAST_LONGITUDE,
+                'value': sensor_data['cpu_temperature'],
+                'unit': 'CPU temperature C',
+                'captured_at': datetime.datetime.now().astimezone().isoformat(),
+                'device_id': SAFECAST_DEVICE_ID,  # Enviro+
+                'location_name': SAFECAST_LOCATION_NAME,
+                'height': None
+            })
+            if DEBUG:
+                logging.info('Safecast CPU temperature measurement created, id: {}'.format(measurement['id']))
         except Exception as exception:
             logging.warning('Exception sending to Safecast: {}'.format(exception))
 
