@@ -108,7 +108,7 @@ def get_cpu_temperature():
     with open("/sys/class/thermal/thermal_zone0/temp", "r") as f:
         temp = f.read()
         temp = int(temp) / 1000.0
-    CPU_TEMPERATURE.set(temp)
+        CPU_TEMPERATURE.set(temp)
 
 def get_temperature(factor):
     """Get temperature from the weather sensor"""
