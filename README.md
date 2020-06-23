@@ -107,18 +107,24 @@ git clone https://github.com/tijmenvandenbrink/enviroplus_exporter.git
 sudo cp -r enviroplus_exporter /usr/src/
 sudo chown -R pi:pi /usr/src/enviroplus_exporter
 ```
-2.Install as a Systemd service
+
+2.Install dependencies for enviroplus-exporter
+```sh
+pip install -r requirements.txt
+```
+
+3.Install as a Systemd service
 ```sh
 cd /usr/src/enviroplus_exporter
 sudo cp contrib/enviroplus-exporter.service /etc/systemd/system/enviroplus-exporter.service
 sudo chmod 644 /etc/systemd/system/enviroplus-exporter.service
 sudo systemctl daemon-reload
 ```
-3.Start the enviroplus-exporter service
+4.Start the enviroplus-exporter service
 ```sh
 sudo systemctl start enviroplus-exporter
 ```
-4.Check the status of the service
+5.Check the status of the service
 ```sh
 sudo systemctl status enviroplus-exporter
 ```
@@ -141,7 +147,7 @@ Jan 17 14:13:41 wall-e python[30373]: Press Ctrl+C to exit!
 Jan 17 14:13:41 wall-e python[30373]: 2020-01-17 14:13:41.581 INFO     Listening on http://0.0.0.0:8000
 ```
 
-5.Enable at boot time
+6.Enable at boot time
 ```sh
 sudo systemctl enable enviroplus-exporter
 ```
