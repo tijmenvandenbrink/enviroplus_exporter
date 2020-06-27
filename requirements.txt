@@ -1,1 +1,2 @@
 prometheus-client>=0.7.1
+influxdb-client>=1.8.0
