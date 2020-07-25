@@ -128,12 +128,12 @@ def get_pressure():
 
 def get_humidity(humidity_compensation):
     """Get humidity from the weather sensor"""
-    # Increase the humidity_compensation to reduce the humidity.
-    # Decrease it to increase the humidity.
+    # Increase the humidity_compensation to increase the humidity.
+    # Decrease it to decrease the humidity.
     humidity = bme280.get_humidity()
 
     if humidity_compensation:
-        humidity = humidity - humidity_compensation
+        humidity = humidity + humidity_compensation
 
     HUMIDITY.set(humidity)
 
