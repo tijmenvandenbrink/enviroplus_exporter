@@ -110,16 +110,14 @@ def get_cpu_temperature():
         temp = int(temp) / 1000.0
         CPU_TEMPERATURE.set(temp)
 
-def get_temperature(factor):
+def get_temperature(temperature_compensation):
     """Get temperature from the weather sensor"""
-    # Tuning factor for compensation. Decrease this number to adjust the
-    # temperature down, and increase to adjust up
-    raw_temp = bme280.get_temperature()
+    # Increase the temperature_compensation to reduce the temperature.
+    # Decrease it to increase the temperature.
+    temperature = bme280.get_temperature()
 
-    if factor:
-        temperature = raw_temp - factor
-    else:
-        temperature = raw_temp
+    if temperature_compensation:
+        temperature = temperature - temperature_compensation
 
     TEMPERATURE.set(temperature)   # Set to a given value
 
@@ -128,9 +126,15 @@ def get_pressure():
     pressure = bme280.get_pressure()
     PRESSURE.set(pressure)
 
-def get_humidity():
+def get_humidity(humidity_compensation):
     """Get humidity from the weather sensor"""
+    # Increase the humidity_compensation to reduce the humidity.
+    # Decrease it to increase the humidity.
     humidity = bme280.get_humidity()
+
+    if humidity_compensation:
+        humidity = humidity - humidity_compensation
+
     HUMIDITY.set(humidity)
 
 def get_gas():
@@ -400,7 +404,8 @@ if __name__ == '__main__':
     parser = argparse.ArgumentParser()
     parser.add_argument("-b", "--bind", metavar='ADDRESS', default='0.0.0.0', help="Specify alternate bind address [default: 0.0.0.0]")
     parser.add_argument("-p", "--port", metavar='PORT', default=8000, type=int, help="Specify alternate port [default: 8000]")
-    parser.add_argument("-f", "--factor", metavar='FACTOR', type=float, help="The compensation factor to get better temperature results when the Enviro+ pHAT is too close to the Raspberry Pi board")
+    parser.add_argument("-f", "--temp", metavar='TEMPERATURE', type=float, help="The temperature compensation value to get better temperature results when the Enviro+ pHAT is too close to the Raspberry Pi board")
+    parser.add_argument("-f", "--humid", metavar='HUMIDITY', type=float, help="The humidity compensation value to get better temperature results when the Enviro+ pHAT is too close to the Raspberry Pi board")
     parser.add_argument("-d", "--debug", metavar='DEBUG', type=str_to_bool, help="Turns on more vebose logging, showing sensor output and post responses [default: false]")
     parser.add_argument("-i", "--influxdb", metavar='INFLUXDB', type=str_to_bool, default='false', help="Post sensor data to InfluxDB Cloud [default: false]")
     parser.add_argument("-l", "--luftdaten", metavar='LUFTDATEN', type=str_to_bool, default='false', help="Post sensor data to Luftdaten.info [default: false]")
@@ -415,8 +420,11 @@ if __name__ == '__main__':
     if args.debug:
         DEBUG = True
 
-    if args.factor:
-        logging.info("Using compensating algorithm (factor={}) to account for heat leakage from Raspberry Pi board".format(args.factor))
+    if args.temp:
+        logging.info("Using temperature compensation, reducing the output value by {}° to account for heat leakage from Raspberry Pi board".format(args.temp))
+
+    if args.humid:
+        logging.info("Using humidity compensation, reducing the output value by {}° to account for heat leakage from Raspberry Pi board".format(args.temp))
 
     if args.influxdb:
         # Post to InfluxDB in another thread
@@ -449,9 +457,9 @@ if __name__ == '__main__':
     logging.info("Listening on http://{}:{}".format(args.bind, args.port))
 
     while True:
-        get_temperature(args.factor)
+        get_temperature(args.temp)
         get_pressure()
-        get_humidity()
+        get_humidity(args.humid)
         get_gas()
         get_light()
         get_particulates()
