@@ -59,6 +59,7 @@
   * [Prerequisites](#prerequisites)
   * [Installation](#installation)
 * [Usage](#usage)
+* [Docker](#docker)
 * [Roadmap](#roadmap)
 * [Contributing](#contributing)
 * [License](#license)
@@ -235,6 +236,18 @@ I published the dashboard on [grafana.com](https://grafana.com/grafana/dashboard
     <img src="images/grafana_dashboard_3.png" alt="Grafana Dashboard 3" width="480" height="280">
   </a>
 </p>
+
+### Docker
+
+There is a Dockerfile available if you'd like to run as a docker container.
+
+1.Building
+
+```docker build -t enviroplus-exporter .```
+
+2.Running
+
+```docker run -d enviroplus-exporter -d -p 8000:8000 --device=/dev/i2c-1 --device=/dev/gpiomem --device=/dev/ttyAMA0 enviroplus-exporter```
 
 <!-- ROADMAP -->
 ## Roadmap
