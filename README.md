@@ -88,7 +88,8 @@ To get the prometheus enviroplus-exporter up and running I'm assuming you alread
 
 ### Prerequisites
 
-To run the enviroplus-exporter you need to have the enviroplus-python library by Pimoroni installed:
+- Python3
+- To run the enviroplus-exporter you need to have the enviroplus-python library by Pimoroni installed:
  
 ### One-line (Installs enviroplus-python library from GitHub)
 
@@ -111,7 +112,7 @@ sudo chown -R pi:pi /usr/src/enviroplus_exporter
 
 2.Install dependencies for enviroplus-exporter
 ```sh
-pip install -r requirements.txt
+pip3 install -r requirements.txt
 ```
 
 3.Install as a Systemd service
