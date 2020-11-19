@@ -153,6 +153,10 @@ Jan 17 14:13:41 wall-e python[30373]: 2020-01-17 14:13:41.581 INFO     Listening
 sudo systemctl enable enviroplus-exporter
 ```
 
+## Enviro users
+
+If you are using an Enviro (not Enviro+) add `--enviro=true` to the command line (in the `/etc/systemd/system/enviroplus-exporter.service` file) then it won't try to use the missing sensors.
+
 <!-- USAGE EXAMPLES -->
 ## Usage
 
