@@ -17,7 +17,9 @@ from periphery import Serial
 
 from bme280 import BME280
 from enviroplus import gas
-from pms5003 import PMS5003, ReadTimeoutError as pmsReadTimeoutError
+from pms5003 import PMS5003
+from pms5003 import ReadTimeoutError as pmsReadTimeoutError
+from pms5003 import SerialTimeoutError as pmsSerialTimeoutError
 
 try:
     from smbus2 import SMBus
@@ -162,7 +164,7 @@ def get_particulates():
     """Get the particulate matter readings"""
     try:
         pms_data = pms5003.read()
-    except pmsReadTimeoutError:
+    except (pmsReadTimeoutError, pmsSerialTimeoutError):
         logging.warning("Failed to read PMS5003")
     else:
         PM1.set(pms_data.pm_ug_per_m3(1.0))
