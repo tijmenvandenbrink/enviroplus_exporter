@@ -65,8 +65,8 @@ PM1 = Gauge('PM1', 'Particulate Matter of diameter less than 1 micron. Measured 
 PM25 = Gauge('PM25', 'Particulate Matter of diameter less than 2.5 microns. Measured in micrograms per cubic metre (ug/m3)')
 PM10 = Gauge('PM10', 'Particulate Matter of diameter less than 10 microns. Measured in micrograms per cubic metre (ug/m3)')
 CPU_TEMPERATURE = Gauge('cpu_temperature','CPU temperature measured (*C)')
-BATTERY_VOLTAGE = Gauge('voltage','Voltage of the battery (Volts)')
-BATTERY_PERCENTAGE = Gauge('percentage','Percentage of the battery remaining (%)')
+BATTERY_VOLTAGE = Gauge('battery_voltage','Voltage of the battery (Volts)')
+BATTERY_PERCENTAGE = Gauge('battery_percentage','Percentage of the battery remaining (%)')
 
 OXIDISING_HIST = Histogram('oxidising_measurements', 'Histogram of oxidising measurements', buckets=(0, 10000, 15000, 20000, 25000, 30000, 35000, 40000, 45000, 50000, 55000, 60000, 65000, 70000, 75000, 80000, 85000, 90000, 100000))
 REDUCING_HIST = Histogram('reducing_measurements', 'Histogram of reducing measurements', buckets=(0, 100000, 200000, 300000, 400000, 500000, 600000, 700000, 800000, 900000, 1000000, 1100000, 1200000, 1300000, 1400000, 1500000))
