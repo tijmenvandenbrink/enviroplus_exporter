@@ -8,6 +8,7 @@ import logging
 import argparse
 from threading import Thread
 
+import board
 from influxdb_client import InfluxDBClient, Point
 from influxdb_client.client.write_api import SYNCHRONOUS
 from prometheus_client import start_http_server, Gauge, Histogram
@@ -20,6 +21,7 @@ from enviroplus import gas
 from pms5003 import PMS5003
 from pms5003 import ReadTimeoutError as pmsReadTimeoutError
 from pms5003 import SerialTimeoutError as pmsSerialTimeoutError
+from adafruit_lc709203f import LC709023F, PackSize
 
 try:
     from smbus2 import SMBus
@@ -49,6 +51,7 @@ DEBUG = os.getenv('DEBUG', 'false') == 'true'
 bus = SMBus(1)
 bme280 = BME280(i2c_dev=bus)
 pms5003 = PMS5003()
+sensor = LC709023F(board.I2C())
 
 TEMPERATURE = Gauge('temperature','Temperature measured (*C)')
 PRESSURE = Gauge('pressure','Pressure measured (hPa)')
@@ -62,6 +65,8 @@ PM1 = Gauge('PM1', 'Particulate Matter of diameter less than 1 micron. Measured 
 PM25 = Gauge('PM25', 'Particulate Matter of diameter less than 2.5 microns. Measured in micrograms per cubic metre (ug/m3)')
 PM10 = Gauge('PM10', 'Particulate Matter of diameter less than 10 microns. Measured in micrograms per cubic metre (ug/m3)')
 CPU_TEMPERATURE = Gauge('cpu_temperature','CPU temperature measured (*C)')
+BATTERY_VOLTAGE = Gauge('voltage','Voltage of the battery (Volts)')
+BATTERY_PERCENTAGE = Gauge('percentage','Percentage of the battery remaining (%)')
 
 OXIDISING_HIST = Histogram('oxidising_measurements', 'Histogram of oxidising measurements', buckets=(0, 10000, 15000, 20000, 25000, 30000, 35000, 40000, 45000, 50000, 55000, 60000, 65000, 70000, 75000, 80000, 85000, 90000, 100000))
 REDUCING_HIST = Histogram('reducing_measurements', 'Histogram of reducing measurements', buckets=(0, 100000, 200000, 300000, 400000, 500000, 600000, 700000, 800000, 900000, 1000000, 1100000, 1200000, 1300000, 1400000, 1500000))
@@ -104,6 +109,21 @@ else:
 
 # Setup Blues Notecard
 NOTECARD_TIME_BETWEEN_POSTS = int(os.getenv('NOTECARD_TIME_BETWEEN_POSTS', '600'))
+
+# Setup LC709023F battery monitor
+if DEBUG:
+    logging.info('## LC709023F battery monitor ##')
+try:
+    if DEBUG:
+        logging.info("Sensor IC version: {}".format(hex(sensor.ic_version)))
+    # Set the battery pack size to 3000 mAh
+    sensor.pack_size = PackSize.MAH3000
+    sensor.init_RSOC()
+    if DEBUG:
+        logging.info("Battery size: {}".format(PackSize.string[sensor.pack_sizes]))
+except RuntimeError as exception:
+    logging.error("Failed to read sensor with error: {}".format(exception))
+    logging.info("Try setting the I2C clock speed to 10000Hz")
 
 def get_cpu_temperature():
     """Get the temperature from the Raspberry Pi CPU"""
@@ -170,6 +190,18 @@ def get_particulates():
         PM1.set(pms_data.pm_ug_per_m3(1.0))
         PM25.set(pms_data.pm_ug_per_m3(2.5))
         PM10.set(pms_data.pm_ug_per_m3(10))
+
+def get_battery():
+    """Get the battery voltage and percentage left"""
+    try:
+        voltage_reading = sensor.cell_voltage
+        percentage_reading = sensor.cell_percent
+        BATTERY_VOLTAGE.set(voltage_reading)
+        BATTERY_PERCENTAGE.set(percentage_reading)
+        if DEBUG:
+            logging.info("Battery: {} Volts / {} %".format(sensor.cell_voltage, sensor.cell_percent))
+    except RuntimeError as exception:
+        logging.warning("Failed to read sensor with error: {}".format(exception))
 
 def collect_all_data():
     """Collects all the data currently set"""
@@ -466,5 +498,6 @@ if __name__ == '__main__':
         get_light()
         get_particulates()
         get_cpu_temperature()
+        get_battery()
         if DEBUG:
             logging.info('Sensor data: {}'.format(collect_all_data()))
