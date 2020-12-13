@@ -200,8 +200,8 @@ def get_battery():
         BATTERY_PERCENTAGE.set(percentage_reading)
         if DEBUG:
             logging.info("Battery: {} Volts / {} %".format(sensor.cell_voltage, sensor.cell_percent))
-    except RuntimeError as exception:
-        logging.warning("Failed to read sensor with error: {}".format(exception))
+    except (RuntimeError, OSError) as exception:
+        logging.warning("Failed to read battery monitor with error: {}".format(exception))
 
 def collect_all_data():
     """Collects all the data currently set"""
