@@ -218,6 +218,8 @@ def collect_all_data():
     sensor_data['pm25'] = PM25.collect()[0].samples[0].value
     sensor_data['pm10'] = PM10.collect()[0].samples[0].value
     sensor_data['cpu_temperature'] = CPU_TEMPERATURE.collect()[0].samples[0].value
+    sensor_data['battery_voltage'] = BATTERY_VOLTAGE.collect()[0].samples[0].value
+    sensor_data['battery_percentage'] = BATTERY_PERCENTAGE.collect()[0].samples[0].value
     return sensor_data
 
 def post_to_influxdb():
@@ -403,6 +405,10 @@ def post_to_notehub():
                 data_unit = 'Lux'
             elif 'pm' in sensor_data_key:
                 data_unit = 'ug/m3'
+            elif 'battery_voltage' in sensor_data_key:
+                data_unit = 'V'
+            elif 'battery_percentage' in sensor_data_key:
+                data_unit = '%'
             request = {'req':'note.add','body':{sensor_data_key:sensor_data[sensor_data_key], 'units':data_unit}}
             try:
                 response = card.Transaction(request)
