@@ -237,9 +237,6 @@ I published the dashboard on [grafana.com](https://grafana.com/grafana/dashboard
   <a href="images/grafana_dashboard_2.png">
     <img src="images/grafana_dashboard_2.png" alt="Grafana Dashboard 2" width="480" height="280">
   </a>
-  <a href="images/grafana_dashboard_3.png">
-    <img src="images/grafana_dashboard_3.png" alt="Grafana Dashboard 3" width="480" height="280">
-  </a>
 </p>
 
 ### Docker
