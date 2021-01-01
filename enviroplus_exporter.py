@@ -5,6 +5,7 @@ import requests
 import time
 import logging
 import argparse
+import subprocess
 from threading import Thread
 
 from influxdb_client import InfluxDBClient, Point
@@ -30,6 +31,8 @@ except ImportError:
 logging.basicConfig(
     format='%(asctime)s.%(msecs)03d %(levelname)-8s %(message)s',
     level=logging.INFO,
+    handlers=[logging.FileHandler("enviroplus_exporter.log"),
+              logging.StreamHandler()],
     datefmt='%Y-%m-%d %H:%M:%S')
 
 logging.info("""enviroplus_exporter.py - Expose readings from the Enviro+ sensor by Pimoroni in Prometheus format
@@ -78,6 +81,12 @@ influxdb_api = influxdb_client.write_api(write_options=SYNCHRONOUS)
 # Setup Luftdaten
 LUFTDATEN_TIME_BETWEEN_POSTS = int(os.getenv('LUFTDATEN_TIME_BETWEEN_POSTS', '30'))
 
+# Sometimes the sensors can't be read. Resetting the i2c 
+def reset_i2c():
+    subprocess.run(['i2cdetect', '-y', '1'])
+    time.sleep(2)
+
+
 # Get the temperature of the CPU for compensation
 def get_cpu_temperature():
     with open("/sys/class/thermal/thermal_zone0/temp", "r") as f:
@@ -105,34 +114,50 @@ def get_temperature(factor):
 
 def get_pressure():
     """Get pressure from the weather sensor"""
-    pressure = bme280.get_pressure()
-    PRESSURE.set(pressure)
+    try:
+        pressure = bme280.get_pressure()
+        PRESSURE.set(pressure)
+    except IOError:
+        logging.error("Could not get pressure readings. Resetting i2c.")
+        reset_i2c()
 
 def get_humidity():
     """Get humidity from the weather sensor"""
-    humidity = bme280.get_humidity()
-    HUMIDITY.set(humidity)
+    try:
+        humidity = bme280.get_humidity()
+        HUMIDITY.set(humidity)
+    except IOError:
+        logging.error("Could not get humidity readings. Resetting i2c.")
+        reset_i2c()
 
 def get_gas():
     """Get all gas readings"""
-    readings = gas.read_all()
+    try:
+        readings = gas.read_all()
 
-    OXIDISING.set(readings.oxidising)
-    OXIDISING_HIST.observe(readings.oxidising)
+        OXIDISING.set(readings.oxidising)
+        OXIDISING_HIST.observe(readings.oxidising)
 
-    REDUCING.set(readings.reducing)
-    REDUCING_HIST.observe(readings.reducing)
+        REDUCING.set(readings.reducing)
+        REDUCING_HIST.observe(readings.reducing)
 
-    NH3.set(readings.nh3)
-    NH3_HIST.observe(readings.nh3)
+        NH3.set(readings.nh3)
+        NH3_HIST.observe(readings.nh3)
+    except IOError:
+        logging.error("Could not get gas readings. Resetting i2c.")
+        reset_i2c()
 
 def get_light():
     """Get all light readings"""
-    lux = ltr559.get_lux()
-    prox = ltr559.get_proximity()
+    try:
+       lux = ltr559.get_lux()
+       prox = ltr559.get_proximity()
 
-    LUX.set(lux)
-    PROXIMITY.set(prox)
+       LUX.set(lux)
+       PROXIMITY.set(prox)
+    except IOError:
+        logging.error("Could not get lux and proximity readings. Resetting i2c.")
+        reset_i2c()
 
 def get_particulates():
     """Get the particulate matter readings"""
@@ -140,6 +165,9 @@ def get_particulates():
         pms_data = pms5003.read()
     except pmsReadTimeoutError:
         logging.warning("Failed to read PMS5003")
+    except IOError:
+        logging.error("Could not get particulate matter readings. Resetting i2c.")
+        reset_i2c()
     else:
         PM1.set(pms_data.pm_ug_per_m3(1.0))
         PM25.set(pms_data.pm_ug_per_m3(2.5))
