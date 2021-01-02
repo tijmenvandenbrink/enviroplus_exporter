@@ -8,13 +8,15 @@ import argparse
 import subprocess
 from threading import Thread
 
-from influxdb_client import InfluxDBClient, Point
-from influxdb_client.client.write_api import SYNCHRONOUS
 from prometheus_client import start_http_server, Gauge, Histogram
 
 from bme280 import BME280
 from enviroplus import gas
 from pms5003 import PMS5003, ReadTimeoutError as pmsReadTimeoutError
+
+if args.influxdb:
+    from influxdb_client import InfluxDBClient, Point
+    from influxdb_client.client.write_api import SYNCHRONOUS
 
 try:
     from smbus2 import SMBus
