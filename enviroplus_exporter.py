@@ -161,16 +161,19 @@ def get_humidity(humidity_compensation):
 
 def get_gas():
     """Get all gas readings"""
-    readings = gas.read_all()
+    try:
+        readings = gas.read_all()
+    except OSError as exception:
+        logging.warning("Failed to read gas sensor with error: {}".format(exception))
+    else:
+        OXIDISING.set(readings.oxidising)
+        OXIDISING_HIST.observe(readings.oxidising)
 
-    OXIDISING.set(readings.oxidising)
-    OXIDISING_HIST.observe(readings.oxidising)
+        REDUCING.set(readings.reducing)
+        REDUCING_HIST.observe(readings.reducing)
 
-    REDUCING.set(readings.reducing)
-    REDUCING_HIST.observe(readings.reducing)
-
-    NH3.set(readings.nh3)
-    NH3_HIST.observe(readings.nh3)
+        NH3.set(readings.nh3)
+        NH3_HIST.observe(readings.nh3)
 
 def get_light():
     """Get all light readings"""
