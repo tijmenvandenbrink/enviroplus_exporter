@@ -163,7 +163,7 @@ def get_gas():
     """Get all gas readings"""
     try:
         readings = gas.read_all()
-    except OSError as exception:
+    except (OSError, ValueError) as exception:
         logging.warning("Failed to read gas sensor with error: {}".format(exception))
     else:
         OXIDISING.set(readings.oxidising)
