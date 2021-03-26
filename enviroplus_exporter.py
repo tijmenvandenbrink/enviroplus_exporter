@@ -178,11 +178,14 @@ def get_gas():
 
 def get_light():
     """Get all light readings"""
-    lux = ltr559.get_lux()
-    prox = ltr559.get_proximity()
-
-    LUX.set(lux)
-    PROXIMITY.set(prox)
+    try:
+        lux = ltr559.get_lux()
+        prox = ltr559.get_proximity()
+    except OSError as exception:
+        logging.warning("Failed to read light sensor with error: {}".format(exception))
+    else:
+        LUX.set(lux)
+        PROXIMITY.set(prox)
 
 def get_particulates():
     """Get the particulate matter readings"""
