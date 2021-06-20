@@ -1,0 +1,3 @@
+[submodule "notecard"]
+	path = notecard
+	url = https://github.com/blues/note-python.git
