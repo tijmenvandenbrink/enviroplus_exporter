@@ -514,14 +514,12 @@ if __name__ == '__main__':
 
     while True:
         get_temperature(args.temp)
+        get_humidity(args.humid)
         get_pressure()
-        get_humidity()
         get_light()
         get_gas()
         if not args.enviro:
             get_particulates()
-        get_humidity(args.humid)
-        get_light()
         get_cpu_temperature()
         get_battery()
         if DEBUG:
