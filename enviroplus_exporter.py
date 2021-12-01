@@ -9,7 +9,7 @@ from threading import Thread
 
 import requests
 from bme280 import BME280
-from enviroplus import gas
+from enviroplus import gas, noise
 from influxdb_client import InfluxDBClient, Point
 from influxdb_client.client.write_api import SYNCHRONOUS
 from pms5003 import PMS5003
@@ -49,6 +49,7 @@ DEBUG = os.getenv("DEBUG", "false") == "true"
 bus = SMBus(1)
 bme280 = BME280(i2c_dev=bus)
 pms5003 = PMS5003()
+noise = noise.Noise()
 
 TEMPERATURE = Gauge("temperature", "Temperature measured (*C)")
 PRESSURE = Gauge("pressure", "Pressure measured (hPa)")
@@ -77,6 +78,10 @@ PM10 = Gauge(
     "PM10",
     "Particulate Matter of diameter less than 10 microns. Measured in micrograms per cubic metre (ug/m3)",
 )
+FREQ_LOW = Gauge("FREQ_LOW", "Amplitude of low frequency noise.")
+FREQ_MED = Gauge("FREQ_MED", "Amplitude of medium frequency noise.")
+FREQ_HIGH = Gauge("FREQ_HIGH", "Amplitude of high frequency noise.")
+FREQ_AVG = Gauge("FREQ_AVG", "Average amplitude of frequencies (FREQ_LOW, FREQ_MED, FREQ_HIGH).")
 
 OXIDISING_HIST = Histogram(
     "oxidising_measurements",
@@ -287,6 +292,20 @@ def get_particulates():
         PM10_HIST.observe(pms_data.pm_ug_per_m3(10) - pms_data.pm_ug_per_m3(2.5))
 
 
+def get_noise():
+    """Get noise data"""
+    low, mid, high, amp = noise.get_noise_profile()
+    low *= 128
+    mid *= 128
+    high *= 128
+    amp *= 64
+
+    FREQ_LOW.set(low)
+    FREQ_MED.set(mid)
+    FREQ_HIGH.set(high)
+    FREQ_AVG.set(amp)
+
+
 def collect_all_data():
     """Collects all the data currently set"""
     sensor_data = {}
@@ -301,6 +320,10 @@ def collect_all_data():
     sensor_data["pm1"] = PM1.collect()[0].samples[0].value
     sensor_data["pm25"] = PM25.collect()[0].samples[0].value
     sensor_data["pm10"] = PM10.collect()[0].samples[0].value
+    sensor_data["freq_low"] = FREQ_LOW.collect()[0].samples[0].value
+    sensor_data["freq_med"] = FREQ_MED.collect()[0].samples[0].value
+    sensor_data["freq_high"] = FREQ_HIGH.collect()[0].samples[0].value
+    sensor_data["freq_avg"] = FREQ_AVG.collect()[0].samples[0].value
     return sensor_data
 
 
@@ -501,5 +524,6 @@ if __name__ == "__main__":
         if not args.enviro:
             get_gas()
             get_particulates()
+            get_noise()
         if DEBUG:
             logging.info("Sensor data: {}".format(collect_all_data()))
