@@ -6,13 +6,14 @@ import time
 import logging
 import argparse
 import subprocess
+import serial
 from threading import Thread
 
 from prometheus_client import start_http_server, Gauge, Histogram
 
 from bme280 import BME280
 from enviroplus import gas
-from pms5003 import PMS5003, ReadTimeoutError as pmsReadTimeoutError
+from pms5003 import PMS5003, ReadTimeoutError as pmsReadTimeoutError, SerialTimeoutError as pmsSerialTimeoutError
 
 from influxdb_client import InfluxDBClient, Point
 from influxdb_client.client.write_api import SYNCHRONOUS
@@ -47,7 +48,10 @@ DEBUG = os.getenv('DEBUG', 'false') == 'true'
 
 bus = SMBus(1)
 bme280 = BME280(i2c_dev=bus)
-pms5003 = PMS5003()
+try:
+    pms5003 = PMS5003()
+except serial.serialutil.SerialException:
+    logging.warning("Failed to initialise PMS5003.")
 
 TEMPERATURE = Gauge('temperature','Temperature measured (*C)')
 PRESSURE = Gauge('pressure','Pressure measured (hPa)')
@@ -166,10 +170,9 @@ def get_particulates():
     try:
         pms_data = pms5003.read()
     except pmsReadTimeoutError:
-        logging.warning("Failed to read PMS5003")
-    except IOError:
-        logging.error("Could not get particulate matter readings. Resetting i2c.")
-        reset_i2c()
+        logging.warning("Timed out reading PMS5003.")
+    except (IOError, pmsSerialTimeoutError):
+        logging.warning("Could not get particulate matter readings.")
     else:
         PM1.set(pms_data.pm_ug_per_m3(1.0))
         PM25.set(pms_data.pm_ug_per_m3(2.5))
