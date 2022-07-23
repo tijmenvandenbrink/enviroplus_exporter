@@ -1,4 +1,5 @@
-FROM ubuntu:20.04
+ARG ARCH=
+FROM ${ARCH}ubuntu:20.04
 
 RUN ln -fs /usr/share/zoneinfo/Europe/London /etc/localtime
 

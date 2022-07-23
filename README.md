@@ -251,6 +251,10 @@ There is a Dockerfile available if you'd like to run as a docker container.
 
 ```docker run -d enviroplus-exporter -d -p 8000:8000 --device=/dev/i2c-1 --device=/dev/gpiomem --device=/dev/ttyAMA0 enviroplus-exporter```
 
+Using [BuildKit](https://docs.docker.com/develop/develop-images/build_enhancements/) you can build Raspberry Pi compatible images on an amd64.
+
+```docker buildx build --platform linux/arm/v7,linux/arm64/v8 .```
+
 <!-- ROADMAP -->
 ## Roadmap
 
