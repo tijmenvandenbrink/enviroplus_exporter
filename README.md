@@ -255,6 +255,30 @@ Using [BuildKit](https://docs.docker.com/develop/develop-images/build_enhancemen
 
 ```docker buildx build --platform linux/arm/v7,linux/arm64/v8 .```
 
+### Kubernetes
+
+To run this image under Kubernetes you'll need to recreate the docker `--device` options above.
+In the Pod spec:
+
+```yaml
+spec:
+  containers:
+    - name: ...
+      volumeMounts:
+        - { mountPath: /dev/i2c-1,   name: dev-i2c-1 }
+        - { mountPath: /dev/gpiomem, name: dev-gpiomem }
+        - { mountPath: /dev/ttyAMA0, name: dev-uart-0 } # For the PMS5003 on the Enviro+ only
+      securityContext:
+        privileged: true
+  volumes:
+    - name: dev-i2c-1
+      hostPath: { path: /dev/i2c-1, type: CharDevice }
+    - name: dev-gpiomem
+      hostPath: { path: /dev/gpiomem, type: CharDevice }
+    - name: dev-uart-0
+      hostPath: { path: /dev/ttyAMA0, type: CharDevice }
+```
+
 <!-- ROADMAP -->
 ## Roadmap
 
