@@ -122,9 +122,9 @@ sudo cp contrib/enviroplus-exporter.service /etc/systemd/system/enviroplus-expor
 sudo chmod 644 /etc/systemd/system/enviroplus-exporter.service
 sudo systemctl daemon-reload
 ```
-4.Start the enviroplus-exporter service
+4.Enable and start the enviroplus-exporter service
 ```sh
-sudo systemctl start enviroplus-exporter
+sudo systemctl systemctl enable --now enviroplus-exporter
 ```
 5.Check the status of the service
 ```sh
