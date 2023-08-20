@@ -124,7 +124,7 @@ sudo systemctl daemon-reload
 ```
 4.Enable and start the enviroplus-exporter service
 ```sh
-sudo systemctl systemctl enable --now enviroplus-exporter
+sudo systemctl enable --now enviroplus-exporter
 ```
 5.Check the status of the service
 ```sh
