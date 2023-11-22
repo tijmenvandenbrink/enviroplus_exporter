@@ -28,4 +28,4 @@ jobs:
       id: shortsha
       run: echo "sha_short=$(git rev-parse --short HEAD)" >> $GITHUB_OUTPUT
     - name: Build container
-      run: docker buildx build --push -t ghcr.io/${{github.repository}}:latest -t ghcr.io/${{github.repository}}:${{ github.sha }} -t ghcr.io/${{github.repository}}:${{ steps.shortsha.outputs.sha_short }} --platform linux/arm/v7,linux/arm64/v8 .
+      run: docker buildx build --push -t ghcr.io/${{github.repository}}:latest -t ghcr.io/${{github.repository}}:${{ github.sha }} -t ghcr.io/${{github.repository}}:${{ steps.shortsha.outputs.sha_short }} --platform linux/arm/v7,linux/arm64 .
