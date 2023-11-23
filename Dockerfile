@@ -1,5 +1,5 @@
 ARG ARCH=
-FROM ${ARCH}python:3.10.0-slim-bookworm as builder
+FROM ${ARCH}python:3.10.13-slim-bookworm as builder
 
 WORKDIR /enviroplus
 
@@ -16,7 +16,7 @@ COPY requirements.txt .
 
 RUN pip3 install -r requirements.txt
 
-FROM ${ARCH}python:3.10.0-slim-bookworm
+FROM ${ARCH}python:3.10.13-slim-bookworm
 
 WORKDIR /enviroplus
 
