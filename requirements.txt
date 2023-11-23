@@ -1,7 +1,8 @@
-prometheus-client>=0.7.1
-influxdb-client>=1.8.0
-pimoroni-bme280>=0.0.2
-enviroplus>=0.0.3
-RPi.GPIO>=0.7.0
+prometheus-client>=0.19.0
+influxdb-client>=1.38.0
+pms5003==0.0.5
+pimoroni-bme280>=1.0.0
+enviroplus>=0.0.6
+RPi.GPIO>=0.7.1
 smbus>=1.1.post2
-requests>=2.24.0
+requests>=2.31.0
