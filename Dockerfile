@@ -1,5 +1,5 @@
 ARG ARCH=
-FROM ${ARCH}python:3.12.0-slim-bookworm as builder
+FROM ${ARCH}python:3.10.0-slim-bookworm as builder
 
 WORKDIR /enviroplus
 
@@ -16,12 +16,12 @@ COPY requirements.txt .
 
 RUN pip3 install -r requirements.txt
 
-FROM ${ARCH}python:3.12.0-slim-bookworm
+FROM ${ARCH}python:3.10.0-slim-bookworm
 
 WORKDIR /enviroplus
 
 # Make sure you update Python version in path
-COPY --from=builder /usr/local/lib/python3.12/site-packages /usr/local/lib/python3.12/site-packages
+COPY --from=builder /usr/local/lib/python3.10/site-packages /usr/local/lib/python3.10/site-packages
 
 COPY enviroplus_exporter.py .
 
