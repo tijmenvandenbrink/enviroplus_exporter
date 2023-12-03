@@ -1,9 +1,14 @@
-name: Docker Image CI
+name: Docker Image CI - Dev
 
 on:
+  schedule:
+    - cron: "0 10 * * *"
   push:
-    tags:
-      - "v*.*.*"
+    branches:
+      - "master"
+  pull_request:
+    branches:
+      - "master"
 
 jobs:
   build:
@@ -33,12 +38,9 @@ jobs:
           ghcr.io/${{github.repository}}           
         # generate Docker tags based on the following events/attributes
         tags: |
+          # set dev tag for default branch
+          type=raw,value=dev,enable={{is_default_branch}}
           type=schedule,pattern=nightly
-          type=ref,event=branch
-          type=ref,event=pr
-          type=semver,pattern={{version}}
-          type=semver,pattern={{major}}.{{minor}}
-          type=semver,pattern={{major}}
           type=sha
     - name: Build and push
       uses: docker/build-push-action@v5
