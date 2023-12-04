@@ -25,6 +25,8 @@ COPY --from=builder /usr/local/lib/python3.12/site-packages /usr/local/lib/pytho
 
 COPY enviroplus_exporter.py .
 
-CMD python3 enviroplus_exporter.py --bind=0.0.0.0 --port=8000
+#CMD python3 enviroplus_exporter.py --bind=0.0.0.0 --port=8000
 
-# ENTRYPOINT [ "python3", "enviroplus_exporter.py", "--bind=0.0.0.0", "--port=8000" ]
+CMD [ "--bind=0.0.0.0", "--port=8000" ]
+
+ENTRYPOINT [ "python3", "enviroplus_exporter.py" ]
