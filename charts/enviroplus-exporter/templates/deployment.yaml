@@ -36,19 +36,26 @@ spec:
             {{- toYaml .Values.securityContext | nindent 12 }}
           image: "{{ .Values.image.repository }}:{{ .Values.image.tag | default .Chart.AppVersion }}"
           imagePullPolicy: {{ .Values.image.pullPolicy }}
+          command: ["python3", "enviroplus_exporter.py"]
           args: ["--bind=0.0.0.0", "--port=8000"]
           ports:
             - name: http
               containerPort: {{ .Values.service.port }}
               protocol: TCP
-          # livenessProbe:
-          #   httpGet:
-          #     path: /
-          #     port: http
-          # readinessProbe:
-          #   httpGet:
-          #     path: /
-          #     port: http
+          livenessProbe:
+            httpGet:
+              path: /
+              port: http
+              periodSeconds: 10
+              successThreshold: 1
+              timeoutSeconds: 10
+          readinessProbe:
+            httpGet:
+              path: /
+              port: http
+              periodSeconds: 10
+              successThreshold: 1
+              timeoutSeconds: 10              
           resources:
             {{- toYaml .Values.resources | nindent 12 }}
       volumes:

@@ -11,6 +11,25 @@ image:
   pullPolicy: IfNotPresent
   # Overrides the image tag whose default is the chart appVersion.
   tag: ""
+  # Overrides the arguments that are passed to the enviroplus_exporter
+  #
+  # usage: enviroplus_exporter.py [-h] [-b ADDRESS] [-p PORT] [-f FACTOR] [-e ENVIRO] [-d DEBUG] [-i INFLUXDB] [-l LUFTDATEN]
+  # options:
+  #   -h, --help            show this help message and exit
+  #   -b ADDRESS, --bind ADDRESS
+  #                         Specify alternate bind address [default: 0.0.0.0]
+  #   -p PORT, --port PORT  Specify alternate port [default: 8000]
+  #   -f FACTOR, --factor FACTOR
+  #                         The compensation factor to get better temperature results when the Enviro+ pHAT is too close to the Raspberry Pi board
+  #   -e ENVIRO, --enviro ENVIRO
+  #                         Device is an Enviro (not Enviro+) so don't fetch data from gas and particulate sensors as they don't exist
+  #   -d DEBUG, --debug DEBUG
+  #                         Turns on more verbose logging, showing sensor output and post responses [default: false]
+  #   -i INFLUXDB, --influxdb INFLUXDB
+  #                         Post sensor data to InfluxDB [default: false]
+  #   -l LUFTDATEN, --luftdaten LUFTDATEN
+  #                         Post sensor data to Luftdaten [default: false]
+  #args: ["--bind=0.0.0.0", "--port=8000", ]
 
 imagePullSecrets: []
 nameOverride: ""
