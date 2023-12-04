@@ -3,6 +3,16 @@ entries:
   enviroplus-exporter:
   - apiVersion: v2
     appVersion: v1.0.0
+    created: "2023-12-04T12:19:31.276328896Z"
+    description: A Helm chart for Kubernetes
+    digest: c6375e4bee64a98cb1e220bf6503ee9671e0bc6ab68fbf85a59492868802875f
+    name: enviroplus-exporter
+    type: application
+    urls:
+    - https://github.com/tijmenvandenbrink/enviroplus_exporter/releases/download/enviroplus-exporter-0.1.2/enviroplus-exporter-0.1.2.tgz
+    version: 0.1.2
+  - apiVersion: v2
+    appVersion: v1.0.0
     created: "2023-11-25T07:14:47.339422626Z"
     description: A Helm chart for Kubernetes
     digest: 0e067bab65523049579c6290ca4b12198fa7d49b5d06a8090a190e7971d97672
@@ -11,4 +21,4 @@ entries:
     urls:
     - https://github.com/tijmenvandenbrink/enviroplus_exporter/releases/download/enviroplus-exporter-0.1.0/enviroplus-exporter-0.1.0.tgz
     version: 0.1.0
-generated: "2023-11-25T07:14:47.339462269Z"
+generated: "2023-12-04T12:19:31.276342853Z"
