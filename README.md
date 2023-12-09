@@ -57,16 +57,17 @@
   * [Built With](#built-with)
 * [Getting Started](#getting-started)
   * [Prerequisites](#prerequisites)
-  * [Installation](#installation)
+  * [Installation (Run as script)](#installation-run-as-a-script)
+  * [Run using Docker](#run-using-docker)
+  * [Run using the Helm Chart](#run-using-the-helm-chart)
 * [Usage](#usage)
-* [Docker](#docker)
+  * [Configure Prometheus](#configure-prometheus)
+  * [Configure Grafana](#configure-grafana)
 * [Roadmap](#roadmap)
 * [Contributing](#contributing)
 * [License](#license)
 * [Contact](#contact)
 * [Acknowledgements](#acknowledgements)
-
-
 
 <!-- ABOUT THE PROJECT -->
 ## About The Project
@@ -166,7 +167,7 @@ sudo systemctl enable enviroplus-exporter
 
 If you are using an Enviro (not Enviro+) add `--enviro=true` to the command line (in the `/etc/systemd/system/enviroplus-exporter.service` file) then it won't try to use the missing sensors.
 
-### Run enviroplus-exporter using Docker
+### Run using Docker
 
 1. Use the published image
 
@@ -235,7 +236,7 @@ Have a look at `charts/enviroplus-exporter/values.yaml` for more information.
 
 So now we've setup the Prometheus enviroplus-exporter we can start scraping this endpoint from our Prometheus server and get a nice dashboard using Grafana.  
 
-### Prometheus
+### Configure Prometheus
 
 If you haven't setup Prometheus yet have a look at the installation guide [here](https://prometheus.io/docs/prometheus/latest/installation/).
 
@@ -298,7 +299,7 @@ scrape_configs:
 
 I added two labels to the targets ```group: environment``` and ```location: SomeLocation```. The Grafana dashboard uses these labels to distinguish the various locations.
 
-### Grafana
+### Configure Grafana
 
 I published the dashboard on [grafana.com](https://grafana.com/grafana/dashboards/11605). You can import this dashboard using the the ID 11605. Instructions for importing the dashboard can be found [here](https://grafana.com/docs/grafana/latest/reference/export_import/).
 
