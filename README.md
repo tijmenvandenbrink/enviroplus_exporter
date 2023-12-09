@@ -71,7 +71,9 @@
 <!-- ABOUT THE PROJECT -->
 ## About The Project
 
-[![Product Name Screen Shot][product-screenshot]](https://github.com/tijmenvandenbrink/enviroplus_exporter)
+This project was built to export sensor data from Pimoroni's Enviro+ environmental monitoring board for Raspberry Pi. The main goal is to export it in a format so that [Prometheus](https://prometheus.io/) can scrape it so it can then be visualized in a Grafana Dashboard (see installation instruction below), but along the way there were some contributions to the project to also include exporting the data to InfluxDB and [Sensor.Community](https://sensor.community/en/) (formerly known as Luftdaten).
+
+You can run the enviroplus-exporter as a script on your Raspi but I also maintain docker images and a Helm Chart. See the instructions below for your preferred way of installing it.
 
 ### Built With
 
@@ -88,10 +90,17 @@ To get the prometheus enviroplus-exporter up and running I'm assuming you alread
 
 ### Prerequisites
 
+- Enviro or Enviro+ Environment board from Pimoroni
+- Raspberry Pi
+
+### Installation (run as a script)
+
+When running the enviroplus-exporter as a script you need:
+
 - Python3
-- To run the enviroplus-exporter you need to have the enviroplus-python library by Pimoroni installed:
- 
-### One-line (Installs enviroplus-python library from GitHub)
+- enviroplus-python library by Pimoroni
+
+#### One-line (Installs enviroplus-python library from GitHub)
 
 ```sh
 curl -sSL https://get.pimoroni.com/enviroplus | bash
@@ -99,7 +108,6 @@ curl -sSL https://get.pimoroni.com/enviroplus | bash
 
 **Note** Raspbian Lite users may first need to install git: `sudo apt install git`
 
-### Installation
 We're going to run the enviroplus-exporter as the user ```pi``` in the directory ```/usr/src/```. Adjust this as you wish.
  
 1.Clone the enviroplus-exporter repository
@@ -154,9 +162,73 @@ Jan 17 14:13:41 wall-e python[30373]: 2020-01-17 14:13:41.581 INFO     Listening
 sudo systemctl enable enviroplus-exporter
 ```
 
-## Enviro users
+#### Enviro users
 
 If you are using an Enviro (not Enviro+) add `--enviro=true` to the command line (in the `/etc/systemd/system/enviroplus-exporter.service` file) then it won't try to use the missing sensors.
+
+### Run enviroplus-exporter using Docker
+
+1. Use the published image
+
+```sh
+docker pull ghcr.io/tijmenvandenbrink/enviroplus_exporter:latest
+```
+
+The following image tags are published:
+
+- `latest` which is the latest stable version. It's best practice not to use latest so you can use the specific version (SemVer is used) that comes along with it. E.g. `1.1.0` or `1.1`.
+- `dev` and `nightly` which is used for development. You probably don't want to use this one as it's not guaranteed to run.
+
+For more information look at the Packages overview [here](https://github.com/tijmenvandenbrink/enviroplus_exporter/pkgs/container/enviroplus_exporter).
+
+2. Or build it yourself
+
+```sh
+docker build -t enviroplus-exporter .
+```
+
+Or using [BuildKit](https://docs.docker.com/develop/develop-images/build_enhancements/) you can build Raspberry Pi compatible images on an amd64.
+
+```sh
+docker buildx build --platform linux/arm/v7,linux/arm64/v8 .
+```
+
+3. Running
+
+```sh
+docker run -d enviroplus-exporter -d -p 8000:8000 --device=/dev/i2c-1 --device=/dev/gpiomem --device=/dev/ttyAMA0 enviroplus-exporter
+```
+
+### Run using the Helm Chart
+
+To use the Helm Chart for installing the enviroplus-exporter in a Kubernetes cluster you'll need [Helm 3](https://v3.helm.sh/) and a Kubernetes Cluster. I personally use [K3s](https://k3s.io/) bootstrapped with [k3s-up](https://github.com/alexellis/k3sup).
+
+#### Initialize a Helm Chart Repository
+Once you have Helm ready, you can add the chart repository.
+
+```sh
+helm repo add enviroplus-exporter https://tijmenvandenbrink.github.io/enviroplus_exporter/
+```
+
+Once this is installed, you will be able to list the charts you can install:
+
+```sh
+helm search repo enviroplus-exporter
+```
+
+To install the chart, you can run the helm install command.
+
+```sh
+helm install enviroplus-exporter enviroplus-exporter/enviroplus-exporter
+```
+
+If you want to override any defaults specified in `values.yaml` you can provide your own values with the `-f` argument:
+
+```sh
+helm install -f enviroplus-values.yaml enviroplus-exporter enviroplus-exporter/enviroplus-exporter
+```
+
+Have a look at `charts/enviroplus-exporter/values.yaml` for more information.
 
 <!-- USAGE EXAMPLES -->
 ## Usage
@@ -238,48 +310,6 @@ I published the dashboard on [grafana.com](https://grafana.com/grafana/dashboard
     <img src="images/grafana_dashboard_2.png" alt="Grafana Dashboard 2" width="480" height="280">
   </a>
 </p>
-
-### Docker
-
-1. Use the published image
-
-```docker pull ghcr.io/tijmenvandenbrink/enviroplus_exporter```
-
-2. Or build it yourself
-
-```docker build -t enviroplus-exporter .```
-
-Or using [BuildKit](https://docs.docker.com/develop/develop-images/build_enhancements/) you can build Raspberry Pi compatible images on an amd64.
-
-```docker buildx build --platform linux/arm/v7,linux/arm64/v8 .```
-
-3. Running
-
-```docker run -d enviroplus-exporter -d -p 8000:8000 --device=/dev/i2c-1 --device=/dev/gpiomem --device=/dev/ttyAMA0 enviroplus-exporter```
-
-### Kubernetes
-
-To run this image under Kubernetes you'll need to recreate the docker `--device` options above.
-In the Pod spec:
-
-```yaml
-spec:
-  containers:
-    - name: ...
-      volumeMounts:
-        - { mountPath: /dev/i2c-1,   name: dev-i2c-1 }
-        - { mountPath: /dev/gpiomem, name: dev-gpiomem }
-        - { mountPath: /dev/ttyAMA0, name: dev-uart-0 } # For the PMS5003 on the Enviro+ only
-      securityContext:
-        privileged: true
-  volumes:
-    - name: dev-i2c-1
-      hostPath: { path: /dev/i2c-1, type: CharDevice }
-    - name: dev-gpiomem
-      hostPath: { path: /dev/gpiomem, type: CharDevice }
-    - name: dev-uart-0
-      hostPath: { path: /dev/ttyAMA0, type: CharDevice }
-```
 
 <!-- ROADMAP -->
 ## Roadmap
