@@ -1,5 +1,5 @@
 ARG ARCH=
-FROM ${ARCH}python:3.12.0-slim-bookworm as builder
+FROM ${ARCH}python:3.12-slim-bookworm as builder
 
 WORKDIR /enviroplus
 
