@@ -16,7 +16,7 @@ COPY requirements.txt .
 
 RUN pip3 install -r requirements.txt
 
-FROM ${ARCH}python:3.12.0-slim-bookworm
+FROM ${ARCH}python:3.12.2-slim-bookworm
 
 WORKDIR /enviroplus
 
